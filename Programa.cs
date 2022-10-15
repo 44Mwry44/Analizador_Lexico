@@ -10,19 +10,22 @@ namespace Analizador_Lexico
 {
     class Programa
     {
-        List<string> _lstCodigoFuente = new List<string>();
-        Hashtable _Tokens = new Hashtable();
-        ListaTokens _lstToken = new ListaTokens();
+        string _strCodigoFuente = "";
+        ListaTokens _tokens = new ListaTokens();
+        DataTable _Matriz = new DataTable();
         DataTable _Gramaticas = new DataTable();
+        bool _matrizNormalizada = false;
 
-        public List<string> LstCodigoFuente 
+        public string StrCodigoFuente 
         {
-            get { return _lstCodigoFuente; }
+            get { return _strCodigoFuente; }
+            set { _strCodigoFuente = value; }
         }
 
-        public ListaTokens LstTokens
+        public ListaTokens Tokens
         {
-            get { return _lstToken; }
+            get { return _tokens; }
+            set { _tokens = value; }
         }
 
         public DataTable Gramaticas
@@ -31,112 +34,177 @@ namespace Analizador_Lexico
             set { _Gramaticas = value; }
         }
 
+        public DataTable Matriz
+        {
+            get { return _Matriz; }
+            set { _Matriz = value; }
+        }
+
         //Almacena en una lista de cadenas, linea por linea del codigo fuente
-        public void generarCodigoFuente(string miCodigoFuente)
+        //public void generarCodigoFuente(string miCodigoFuente)
+        //{
+        //    string aux = "";
+
+        //    //Recorre caracter por caracter
+        //    foreach(char caracter in miCodigoFuente)
+        //    {
+        //        //Detecta un \n
+        //        if(caracter == 13)
+        //        {
+        //            //añade la cadeña(linea) a la lista y reinicia la cadena auxiliar
+        //            _lstCodigoFuente.Add(aux);
+        //            aux = "";
+        //        }
+
+        //        //Detecta el fin del texto
+        //        if(caracter == 3)
+        //        {
+        //            _lstCodigoFuente.Add(aux);
+        //            break;
+        //        }
+
+        //        //añade el caracter a la cadena de la linea
+        //        aux = aux + caracter;
+        //    }
+        //}
+
+        public void NormalizarMatriz()
         {
-            string aux = "";
-
-            //Recorre caracter por caracter
-            foreach(char caracter in miCodigoFuente)
+            for(int col = 0; col < Matriz.Columns.Count; col++)
             {
-                //Detecta un \n
-                if(caracter == 13)
+                //aux = Contenido de la celda
+                string aux = Matriz.Rows[0][col].ToString();
+                char caracterNormalizado = ' ';
+                
+                //Si la cadena es mayor a 1 y su primer caracter esta entre A-Z
+                if(aux.Length > 1 && (aux[0] >= 65 && aux[0] <= 90))
                 {
-                    //añade la cadeña(linea) a la lista y reinicia la cadena auxiliar
-                    _lstCodigoFuente.Add(aux);
-                    aux = "";
-                }
+                    caracterNormalizado = aux[0];
 
-                //Detecta el fin del texto
-                if(caracter == 3)
-                {
-                    _lstCodigoFuente.Add(aux);
-                    break;
+                    //La celda ahora es el caracter unicamente
+                    Matriz.Rows[0][col] = caracterNormalizado;
                 }
-
-                //añade el caracter a la cadena de la linea
-                aux = aux + caracter;
             }
+
+            _matrizNormalizada = true;
         }
 
-        public void obtenerTokens(string misTokens)
+        public void ObtenerTokens()
         {
-            if(LstTokens.LstTokens.Count != 0)
+            int estado, caracter, siguienteEstado = 0;
+
+            foreach(List<Token> linea in Tokens.LstTokens)
             {
-                Console.WriteLine("Limpie la lista de Tokens");
-                LstTokens.LstTokens = new List<List<Token>>();
+                foreach(Token token in linea)
+                {
+                    for(int x = 0; x< token.StrCodigo.Length; x++)
+                    {
+                        //Recorro la primer columna para buscar el caracter
+                        for(caracter = 0; caracter < Matriz.Columns.Count; caracter++)
+                        {
+                            //Si encuentro un caracter permitido - obtengo su posicion(columna)
+                            if(token.StrCodigo[x].ToString() == Matriz.Rows[0][caracter].ToString())
+                            {
+                                break;
+                            }
+                        }
+
+                        for(estado = siguienteEstado; estado < Matriz.Rows.Count; estado++)
+                        {
+                            if(siguienteEstado == int.Parse(Matriz.Rows[estado][caracter].ToString()))
+                            {
+                                siguienteEstado = int.Parse(Matriz.Rows[estado][caracter].ToString());
+                            }
+                            break;
+                        }
+                    }
+
+                    estado = siguienteEstado;
+
+                    estado = int.Parse(Matriz.Rows[estado][90].ToString());
+
+                    token.StrToken = Matriz.Rows[estado][91].ToString();
+                }
             }
 
-            string auxString = "";
-            Token auxToken;
-            for(int x = 0; x < misTokens.Length; x++)
+            Tokens.LstTokens.ForEach((linea) => {
+                linea.ForEach((token) => {
+                    Console.WriteLine("Linea: {0} Mi token es: {1}", token.NumLinea, token.StrToken);
+                });
+            });
+        }
+
+        public void GenerarTokens()
+        {
+            //if(!_matrizNormalizada)
+            //{
+            //    NormalizarMatriz();
+            //}
+
+            int numLinea = 1;
+            Token auxToken = new Token();
+            List<Token> linea = new List<Token>();
+
+            for (int caracter = 0; caracter < StrCodigoFuente.Length; caracter++)
             {
-                //Si encuentro un espacio, almaceno la linea, refresco el token auxiliar y doy un paso en el ciclo.
-                if (misTokens[x] == 32)
+                //Si encuentro un salto de linea o fin del codigo
+                if (StrCodigoFuente[caracter] == 13 || StrCodigoFuente[caracter] == 3 || caracter == StrCodigoFuente.Length - 1)
                 {
-                    auxToken = new Token();
-                    auxToken.StrToken = auxString;
-                    _lstToken.LstLineaTokens.Add(auxToken);
-                    auxString = "";
+                    numLinea++;
+                    this.Tokens.AddLineaDeTokens(linea);
+
+                    //foreach (Token miToken in linea)
+                    //{
+                    //    Console.WriteLine("Mi codigo de mi token: " + miToken.StrCodigo);
+                    //}
+
                     continue;
                 }
 
-                //Si encuentro un salto de linea, almaceno la linea, refresco el token auxiliar y doy un paso en el ciclo.
-                if (misTokens[x] == 10)
+                //Si encuentro un espacio
+                if (StrCodigoFuente[caracter] == 32)
                 {
-                    //Console.WriteLine("Encontre un salto de linea");
+                    linea.Add(auxToken);
                     auxToken = new Token();
-                    auxToken.StrToken = auxString;
-                    _lstToken.LstLineaTokens.Add(auxToken);
-                    _lstToken.LstTokens.Add(_lstToken.LstLineaTokens);
-                    //Reinicio la linea
-                    _lstToken.LstLineaTokens = new List<Token>();
-                    auxString = "";
-                    continue;
                 }
 
-                //Si llego al fin de la linea, almaceno la linea y salgo del ciclo.
-                if(x == misTokens.Length-1)
-                {
-                    auxToken = new Token();
-                    auxString += misTokens[x];
-                    auxToken.StrToken = auxString;
-                    _lstToken.LstLineaTokens.Add(auxToken);
-                    _lstToken.LstTokens.Add(_lstToken.LstLineaTokens);
-                    break;
-                }
-
-                //Ningun caso se dio, almaceno el caracter en el token auxiliar
-                auxString += misTokens[x];
+                //agrego el caracter al codigo del token
+                auxToken.StrCodigo += StrCodigoFuente[caracter];
+                auxToken.NumLinea = numLinea;
+                Console.WriteLine("Encontre el caracter: " + StrCodigoFuente[caracter]);
             }
         }
-
-        //BottomUp - Stack Ver 1.0
+        
+        //BottomUp - Stack Ver 1.1
 
         //IF ( ( a > b ) || ( c > a ) )
         //PR05 CE14 CE14 IDEN2 OPR2 IDEN4 CE15 OPLO CE14 IDEN6 OPR2 IDEN6 CE15 CE15
         //PR05 CE14 OPREL OPLO CE14 IDEN6 OPR2 IDEN6 CE15 CE15
         //PR05 CE14 OPREL OPLO OPREL CE15
         //PR05 CE14 OPLOG CE15
-        //
-        public void verificarSintaxis()
+        //INS_IF
+
+        //PR05 CE14 INS_REL CE15 OPLOG CE15 INS_REL CE15
+        //CE14 IDEN OPR2 IDEN CE15 - CE14 INS_REL CE15
+        public void VerificarSintaxis()
         {
             //Si Existen lineas derivadas, reinicia la lista
-            if (LstTokens.LineasDerivadas.Count > 0)
+            if (Tokens.LineasDerivadas.Count > 0)
             {
                 //Console.WriteLine("Limpie las derivaciones");
-                LstTokens.LineasDerivadas = new List<List<Token>>();
+                Tokens.LineasDerivadas = new List<List<Token>>();
             }
 
             //Stack que almacenara cada nivel de analizis por linea
             Stack<List<Token>> BPStack = new Stack<List<Token>>();
 
-            LstTokens.LstTokens.ForEach((linea) =>
+            Tokens.LstTokens.ForEach((linea) =>
             {
                 //Linea auxiliar que se almacenara en el stack si es necesario
                 List<Token> lineaAux = new List<Token>();
                 List<Token> lineaDerivada = new List<Token>();
 
+                //Imprime la linea sin derivar
                 foreach (Token token in linea)
                 {
                     Console.Write(token.StrToken + ' ');
@@ -146,43 +214,32 @@ namespace Analizador_Lexico
 
                 foreach (Token token in linea)
                 {
+                    //Stack = { [IF, (] }
+                    //lineaAux = { ( }
+                    //lineaDerivada = 
+                    //aux = {  }
                     //Encuentro un '(', agrego el token a la lista y la agrego al stack
                     if (token.StrToken == "CE14")
                     {
                         lineaAux.Add(token);
 
-                        //foreach (Token item in lineaAux)
-                        //{
-                        //    Console.Write(item.StrToken + ' ');
-                        //}
-
-                        //Console.Write('\n');
-
                         BPStack.Push(lineaAux);
+
                         lineaAux = new List<Token>();
                         continue;
                     }
 
                     //Encuentro un ')' - Derivo el contenido actual de mi linea, al finalizar, saco el contenido de la pila, y agrego los tokens obtenidos
                     if (token.StrToken == "CE15")
-                    { 
+                    {
                         lineaDerivada = Derivar(lineaAux, true);
-                        
-                        if(BPStack.Count > 0)
-                        {
-                            lineaAux = BPStack.Pop();
-                        }
+
+                        lineaAux = BPStack.Pop();
+
 
                         lineaDerivada.ForEach((item) => lineaAux.Add(item));
 
                         lineaAux.Add(token);
-
-                        //foreach (Token item in lineaAux)
-                        //{
-                        //    Console.Write(item.StrToken + ' ');
-                        //}
-
-                        //Console.Write('\n');
 
                         continue;
                     }
@@ -190,17 +247,24 @@ namespace Analizador_Lexico
                     lineaAux.Add(token);
                 }
 
-                //Console.Write("Ultima derivacion: ");
-                //foreach(Token token in lineaAux)
-                //{
-                //    Console.Write(token.StrToken + ' ');
-                //}
+                if(BPStack.Count > 0)
+                {
+                    List<Token> aux = new List<Token>();
 
-                //Console.Write("\n");
+                    aux = lineaAux;
 
-                lineaDerivada = Derivar(lineaAux, false);
+                    lineaAux = BPStack.Pop();
 
-                LstTokens.LineasDerivadas.Add(lineaDerivada);
+                    aux.ForEach((item) => lineaAux.Add(item));
+
+                    lineaDerivada = Derivar(lineaAux, false);
+                }
+                else
+                {
+                    lineaDerivada = Derivar(lineaAux, false);
+                }
+
+                Tokens.LineasDerivadas.Add(lineaDerivada);
             });
         }
 
