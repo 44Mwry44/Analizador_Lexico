@@ -38,3 +38,14 @@ C:\Users\User\Desktop\Analizador_Lexico\obj\Debug\Analizador_Lexico.csproj.Gener
 C:\Users\User\Desktop\Analizador_Lexico\obj\Debug\Analizador_Lexico.csproj.CoreCompileInputs.cache
 C:\Users\User\Desktop\Analizador_Lexico\obj\Debug\Analizador_Lexico.exe
 C:\Users\User\Desktop\Analizador_Lexico\obj\Debug\Analizador_Lexico.pdb
+E:\Repos\Analizador_Lexico\bin\Debug\Analizador_Lexico.exe.config
+E:\Repos\Analizador_Lexico\bin\Debug\Analizador_Lexico.exe
+E:\Repos\Analizador_Lexico\bin\Debug\Analizador_Lexico.pdb
+E:\Repos\Analizador_Lexico\obj\Debug\Analizador_Lexico.csproj.AssemblyReference.cache
+E:\Repos\Analizador_Lexico\obj\Debug\Analizador_Lexico.csproj.SuggestedBindingRedirects.cache
+E:\Repos\Analizador_Lexico\obj\Debug\Analizador_Lexico.Form1.resources
+E:\Repos\Analizador_Lexico\obj\Debug\Analizador_Lexico.Properties.Resources.resources
+E:\Repos\Analizador_Lexico\obj\Debug\Analizador_Lexico.csproj.GenerateResource.cache
+E:\Repos\Analizador_Lexico\obj\Debug\Analizador_Lexico.csproj.CoreCompileInputs.cache
+E:\Repos\Analizador_Lexico\obj\Debug\Analizador_Lexico.exe
+E:\Repos\Analizador_Lexico\obj\Debug\Analizador_Lexico.pdb

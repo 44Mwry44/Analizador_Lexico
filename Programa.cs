@@ -91,39 +91,41 @@ namespace Analizador_Lexico
 
         public void ObtenerTokens()
         {
-            int estado, caracter, siguienteEstado = 0;
+            int estado = 1, caracter, siguienteEstado = 0;
 
             foreach(List<Token> linea in Tokens.LstTokens)
             {
                 foreach(Token token in linea)
                 {
+                    //Ciclo que recorre la cadena codigoFuente del token
                     for(int x = 0; x< token.StrCodigo.Length; x++)
                     {
-                        //Recorro la primer columna para buscar el caracter
-                        for(caracter = 0; caracter < Matriz.Columns.Count; caracter++)
+                        //Recorro la primer fila para buscar el caracter
+                        for (caracter = 0; caracter < Matriz.Columns.Count; caracter++)
                         {
                             //Si encuentro un caracter permitido - obtengo su posicion(columna)
-                            if(token.StrCodigo[x].ToString() == Matriz.Rows[0][caracter].ToString())
+                            if (token.StrCodigo[x].ToString() == Matriz.Rows[0][caracter].ToString())
                             {
+                                siguienteEstado = int.Parse(Matriz.Rows[estado][caracter].ToString());
+                                Console.WriteLine("Encontre el caracter: " + Matriz.Rows[0][caracter].ToString());
                                 break;
                             }
                         }
 
-                        for(estado = siguienteEstado; estado < Matriz.Rows.Count; estado++)
+                        //Recorro la primer columna en busca de la fila que corresponde al estado
+                        for(estado = 1; estado < Matriz.Rows.Count; estado++)
                         {
-                            if(siguienteEstado == int.Parse(Matriz.Rows[estado][caracter].ToString()))
+                            if(siguienteEstado == int.Parse(Matriz.Rows[estado][0].ToString())) 
                             {
-                                siguienteEstado = int.Parse(Matriz.Rows[estado][caracter].ToString());
+                                break;
                             }
-                            break;
                         }
                     }
 
-                    estado = siguienteEstado;
 
-                    estado = int.Parse(Matriz.Rows[estado][90].ToString());
 
-                    token.StrToken = Matriz.Rows[estado][91].ToString();
+                    token.StrToken = Matriz.Rows[estado][90].ToString();
+                    Console.WriteLine("Encontre el token: " + token.StrToken);
                 }
             }
 
@@ -171,7 +173,7 @@ namespace Analizador_Lexico
                 //agrego el caracter al codigo del token
                 auxToken.StrCodigo += StrCodigoFuente[caracter];
                 auxToken.NumLinea = numLinea;
-                Console.WriteLine("Encontre el caracter: " + StrCodigoFuente[caracter]);
+                //Console.WriteLine("Encontre el caracter: " + StrCodigoFuente[caracter]);
             }
         }
         

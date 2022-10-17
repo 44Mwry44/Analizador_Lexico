@@ -15,7 +15,7 @@ namespace Analizador_Lexico
     public partial class Form1 : Form
     {
         //static string conexionstring = "Data Source=LAPTOP-1PPKPEKT;Initial Catalog=Matriz de transicion;Integrated Security=True";
-        static string conexionstring = "Data Source=Mwry-GO;Initial Catalog=Matriz;Integrated Security=True";
+        static string conexionstring = "Data Source=Mwry-PC;Initial Catalog=Matriz;Integrated Security=True";
 
         SqlConnection conexion = new SqlConnection(conexionstring);
        
