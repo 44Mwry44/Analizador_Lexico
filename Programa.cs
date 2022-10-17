@@ -91,49 +91,62 @@ namespace Analizador_Lexico
 
         public void ObtenerTokens()
         {
-            int estado = 1, caracter, siguienteEstado = 0;
 
             foreach(List<Token> linea in Tokens.LstTokens)
             {
                 foreach(Token token in linea)
                 {
-                    //Ciclo que recorre la cadena codigoFuente del token
-                    for(int x = 0; x< token.StrCodigo.Length; x++)
+                    int estado = 1, caracter = 0, siguienteEstado = 0;
+                    //Recorrido del codigo caracter por caracter
+                    for (int x = 0; x < token.StrCodigo.Length; x++)
                     {
+
                         //Recorro la primer fila para buscar el caracter
                         for (caracter = 0; caracter < Matriz.Columns.Count; caracter++)
                         {
                             //Si encuentro un caracter permitido - obtengo su posicion(columna)
                             if (token.StrCodigo[x].ToString() == Matriz.Rows[0][caracter].ToString())
                             {
-                                siguienteEstado = int.Parse(Matriz.Rows[estado][caracter].ToString());
-                                Console.WriteLine("Encontre el caracter: " + Matriz.Rows[0][caracter].ToString());
                                 break;
                             }
                         }
 
                         //Recorro la primer columna en busca de la fila que corresponde al estado
-                        for(estado = 1; estado < Matriz.Rows.Count; estado++)
+                        for (estado = 1; estado < Matriz.Rows.Count; estado++)
                         {
-                            if(siguienteEstado == int.Parse(Matriz.Rows[estado][0].ToString())) 
+                            //Si el estado(Contenido de la celda) es igual a mi siguiente estado
+                            if (siguienteEstado == int.Parse(Matriz.Rows[estado][0].ToString()))
                             {
+                                siguienteEstado = int.Parse(Matriz.Rows[estado][caracter].ToString());
+                                Console.WriteLine("Mi estado actual es: " + Matriz.Rows[estado][0].ToString());
+                                Console.WriteLine("El siguiente estado es: " + Matriz.Rows[estado][caracter].ToString());
+                                Console.WriteLine("---------------------------------------------------------------------");
+
                                 break;
                             }
                         }
                     }
-
-
-
-                    token.StrToken = Matriz.Rows[estado][90].ToString();
-                    Console.WriteLine("Encontre el token: " + token.StrToken);
+                    //Recorro para buscar la posicion del ultimo estado
+                    for (estado = 1; estado < Matriz.Rows.Count; estado++)
+                    {
+                        //Si el estado(Contenido de la celda) es igual a mi siguiente estado
+                        if (siguienteEstado == int.Parse(Matriz.Rows[estado][0].ToString()))
+                        {
+                            Console.WriteLine("Mi estado actual es: " + Matriz.Rows[estado][89].ToString());
+                            Console.WriteLine("Mi token es: " + Matriz.Rows[estado + 1][90].ToString());
+                            Console.WriteLine("---------------------------------------------------------------------");
+                            token.StrToken = Matriz.Rows[estado + 1][90].ToString();
+                            break;
+                        }
+                    }
                 }
             }
 
-            Tokens.LstTokens.ForEach((linea) => {
-                linea.ForEach((token) => {
-                    Console.WriteLine("Linea: {0} Mi token es: {1}", token.NumLinea, token.StrToken);
-                });
-            });
+            //Tokens.LstTokens.ForEach((linea) => {
+            //    linea.ForEach((token) => {
+            //        Console.WriteLine("Linea: {0} Mi token es: {1}", token.NumLinea, token.StrToken);
+            //    });
+            //});
         }
 
         public void GenerarTokens()
@@ -152,12 +165,20 @@ namespace Analizador_Lexico
                 //Si encuentro un salto de linea o fin del codigo
                 if (StrCodigoFuente[caracter] == 13 || StrCodigoFuente[caracter] == 3 || caracter == StrCodigoFuente.Length - 1)
                 {
+                    auxToken.StrCodigo += StrCodigoFuente[caracter];
+                    auxToken.NumLinea = numLinea;
+                    linea.Add(auxToken);
                     numLinea++;
                     this.Tokens.AddLineaDeTokens(linea);
 
-                    //foreach (Token miToken in linea)
+                    linea = new List<Token>();
+
+                    //foreach (List<Token> miLinea in this.Tokens.LstTokens)
                     //{
-                    //    Console.WriteLine("Mi codigo de mi token: " + miToken.StrCodigo);
+                    //    foreach (Token miToken in miLinea)
+                    //    {
+                    //        Console.WriteLine("Mi codigo de mi token: " + miToken.StrCodigo);
+                    //    }
                     //}
 
                     continue;
@@ -176,7 +197,7 @@ namespace Analizador_Lexico
                 //Console.WriteLine("Encontre el caracter: " + StrCodigoFuente[caracter]);
             }
         }
-        
+
         //BottomUp - Stack Ver 1.1
 
         //IF ( ( a > b ) || ( c > a ) )

@@ -15,7 +15,7 @@ namespace Analizador_Lexico
     public partial class Form1 : Form
     {
         //static string conexionstring = "Data Source=LAPTOP-1PPKPEKT;Initial Catalog=Matriz de transicion;Integrated Security=True";
-        static string conexionstring = "Data Source=Mwry-PC;Initial Catalog=Matriz;Integrated Security=True";
+        static string conexionstring = "Data Source=Mwry-GO;Initial Catalog=Matriz;Integrated Security=True";
 
         SqlConnection conexion = new SqlConnection(conexionstring);
        
@@ -27,8 +27,8 @@ namespace Analizador_Lexico
         Programa miPrograma = new Programa();
 
         //Matriz de transicion y gramaticas.
-        DataTable tabla = new DataTable();
-        DataTable tablaGramaticas = new DataTable();
+        DataTable Matriz = new DataTable();
+        DataTable Gramaticas = new DataTable();
 
         //string GuardarTOKENS;
         int lineaError = 1;
@@ -49,28 +49,21 @@ namespace Analizador_Lexico
             string Consulta = "Select * From Matriz6";
             SqlCommand comando = new SqlCommand(Consulta, conexion);
             SqlDataAdapter data = new SqlDataAdapter(comando);
-            
-            data.Fill(tabla);
+
+            data.Fill(Matriz);
             conexion.Close();
 
             conexion.Open();
-            string Consulta2 = "Select * From Matriz6";
-            SqlCommand comando2 = new SqlCommand(Consulta2, conexion);
-            SqlDataAdapter data2 = new SqlDataAdapter(comando2);
-            DataTable tabla2 = new DataTable();
-            data2.Fill(dtGramaticas);
-            dgvGramatica.DataSource = tabla2;
-
             Consulta = "Select * from gramaticas";
             comando = new SqlCommand(Consulta, conexion);
             data = new SqlDataAdapter(comando);
-            data.Fill(tablaGramaticas);
+            data.Fill(Gramaticas);
 
             conexion.Close();
 
 
-            miPrograma.Matriz = tabla;
-            miPrograma.Gramaticas = tabla2;
+            miPrograma.Matriz = Matriz;
+            miPrograma.Gramaticas = Gramaticas;
             //miPrograma.NormalizarMatriz();
 
             dgvTabla.DataSource = miPrograma.Matriz;
@@ -84,8 +77,15 @@ namespace Analizador_Lexico
             miPrograma.StrCodigoFuente = txtFuente.Text;
             miPrograma.GenerarTokens();
             miPrograma.ObtenerTokens();
-            
-            
+
+            miPrograma.Tokens.LstTokens.ForEach((linea) =>
+            {
+                linea.ForEach((token) =>
+                {
+                    txtToken.Text += token.StrToken + " ";
+                    Console.WriteLine(token.StrToken);
+                });
+            });
 
 
             //miPrograma.generarCodigoFuente(txtFuente.Text);
