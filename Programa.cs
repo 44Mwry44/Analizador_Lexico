@@ -94,7 +94,7 @@ namespace Analizador_Lexico
 
             foreach(List<Token> linea in Tokens.LstTokens)
             {
-                foreach(Token token in linea)
+                foreach (Token token in linea)
                 {
                     int estado = 1, caracter = 0, siguienteEstado = 0;
                     //Recorrido del codigo caracter por caracter
@@ -132,55 +132,63 @@ namespace Analizador_Lexico
                         //Si el estado(Contenido de la celda) es igual a mi siguiente estado
                         if (siguienteEstado == int.Parse(Matriz.Rows[estado][0].ToString()))
                         {
+                            if (int.TryParse(Matriz.Rows[estado][89].ToString(), out int result))
+                            {
+                                siguienteEstado = result;
+                                continue;
+                            }
+
                             Console.WriteLine("Mi estado actual es: " + Matriz.Rows[estado][89].ToString());
-                            Console.WriteLine("Mi token es: " + Matriz.Rows[estado + 1][90].ToString());
+                            Console.WriteLine("Mi token es: " + Matriz.Rows[estado][90].ToString());
                             Console.WriteLine("---------------------------------------------------------------------");
-                            token.StrToken = Matriz.Rows[estado + 1][90].ToString();
+                            token.StrToken = Matriz.Rows[estado][90].ToString();
                             break;
                         }
                     }
                 }
             }
 
-            //Tokens.LstTokens.ForEach((linea) => {
-            //    linea.ForEach((token) => {
-            //        Console.WriteLine("Linea: {0} Mi token es: {1}", token.NumLinea, token.StrToken);
-            //    });
-            //});
+            Tokens.LstTokens.ForEach((linea) =>
+            {
+                linea.ForEach((token) =>
+                {
+                    Console.WriteLine("Linea: {0} Mi token es: {1}", token.NumLinea, token.StrToken);
+                });
+            });
         }
 
         public void GenerarTokens()
         {
-            //if(!_matrizNormalizada)
-            //{
-            //    NormalizarMatriz();
-            //}
+            //Reiniciamos la lista de tokens si es que ya existe una
+            if (Tokens.LstTokens.Count > 0)
+            {
+                Tokens = new ListaTokens();
+            }
 
             int numLinea = 1;
             Token auxToken = new Token();
             List<Token> linea = new List<Token>();
+            char[] sentenciasDeEscape = new char[] { '\r', '\n', ' ' }; 
 
             for (int caracter = 0; caracter < StrCodigoFuente.Length; caracter++)
             {
                 //Si encuentro un salto de linea o fin del codigo
                 if (StrCodigoFuente[caracter] == 13 || StrCodigoFuente[caracter] == 3 || caracter == StrCodigoFuente.Length - 1)
                 {
-                    auxToken.StrCodigo += StrCodigoFuente[caracter];
+                    //Si ese caracter es diferente a una sentencia de escape, lo agrego al codigo del token
+                    //SE UTILIZA PARA AGRAGAR EL ULTIMO CARACTER SIN GENERAR PROBLEMAS
+                    if((char)StrCodigoFuente[caracter] != ' ' || (char)StrCodigoFuente[caracter] != '\r' || (char)StrCodigoFuente[caracter] != '\n')
+                    {
+                        auxToken.StrCodigo += (char)StrCodigoFuente[caracter];
+                    }
                     auxToken.NumLinea = numLinea;
                     linea.Add(auxToken);
                     numLinea++;
                     this.Tokens.AddLineaDeTokens(linea);
 
+                    //Reinicio linea y token auxiliar
                     linea = new List<Token>();
-
-                    //foreach (List<Token> miLinea in this.Tokens.LstTokens)
-                    //{
-                    //    foreach (Token miToken in miLinea)
-                    //    {
-                    //        Console.WriteLine("Mi codigo de mi token: " + miToken.StrCodigo);
-                    //    }
-                    //}
-
+                    auxToken = new Token();
                     continue;
                 }
 
@@ -191,10 +199,24 @@ namespace Analizador_Lexico
                     auxToken = new Token();
                 }
 
-                //agrego el caracter al codigo del token
-                auxToken.StrCodigo += StrCodigoFuente[caracter];
+                //Si encuentro un caracter vacio
+                if (StrCodigoFuente[caracter].ToString() == "")
+                {
+                    continue;
+                }
+
+                //agrego el caracter al codigo del token y le asigno su # de linea
+                auxToken.StrCodigo += (char)StrCodigoFuente[caracter];
                 auxToken.NumLinea = numLinea;
-                //Console.WriteLine("Encontre el caracter: " + StrCodigoFuente[caracter]);
+            }
+
+            //Elimino cualquier caracter que afecte el contenido del token
+            foreach (List<Token> miLinea in Tokens.LstTokens)
+            {
+                foreach (Token token in miLinea)
+                {
+                    token.StrCodigo = token.StrCodigo.Trim(sentenciasDeEscape);
+                }
             }
         }
 
