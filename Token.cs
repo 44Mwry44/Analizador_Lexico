@@ -29,15 +29,5 @@ namespace Analizador_Lexico
             get { return _strCodigo; }
             set { _strCodigo = value; }
         }
-
-        public bool equals(Token otroToken)
-        {
-            if(this.StrCodigo == otroToken.StrCodigo && this.StrToken == otroToken.StrToken)
-            {
-                return true;
-            }
-
-            return false;
-        }
     }
 }
