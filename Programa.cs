@@ -118,9 +118,9 @@ namespace Analizador_Lexico
                             if (siguienteEstado == int.Parse(Matriz.Rows[estado][0].ToString()))
                             {
                                 siguienteEstado = int.Parse(Matriz.Rows[estado][caracter].ToString());
-                                Console.WriteLine("Mi estado actual es: " + Matriz.Rows[estado][0].ToString());
-                                Console.WriteLine("El siguiente estado es: " + Matriz.Rows[estado][caracter].ToString());
-                                Console.WriteLine("---------------------------------------------------------------------");
+                                //Console.WriteLine("Mi estado actual es: " + Matriz.Rows[estado][0].ToString());
+                                //Console.WriteLine("El siguiente estado es: " + Matriz.Rows[estado][caracter].ToString());
+                                //Console.WriteLine("---------------------------------------------------------------------");
 
                                 break;
                             }
@@ -138,9 +138,9 @@ namespace Analizador_Lexico
                                 continue;
                             }
 
-                            Console.WriteLine("Mi estado actual es: " + Matriz.Rows[estado][89].ToString());
-                            Console.WriteLine("Mi token es: " + Matriz.Rows[estado][90].ToString());
-                            Console.WriteLine("---------------------------------------------------------------------");
+                            //Console.WriteLine("Mi estado actual es: " + Matriz.Rows[estado][89].ToString());
+                            //Console.WriteLine("Mi token es: " + Matriz.Rows[estado][90].ToString());
+                            //Console.WriteLine("---------------------------------------------------------------------");
                             token.StrToken = Matriz.Rows[estado][90].ToString();
                             break;
                         }
@@ -152,7 +152,7 @@ namespace Analizador_Lexico
             {
                 linea.ForEach((token) =>
                 {
-                    Console.WriteLine("Linea: {0} Mi token es: {1}", token.NumLinea, token.StrToken);
+                    //Console.WriteLine("Linea: {0} Mi token es: {1}", token.NumLinea, token.StrToken);
                 });
             });
         }
@@ -248,6 +248,9 @@ namespace Analizador_Lexico
                 //Linea auxiliar que se almacenara en el stack si es necesario
                 List<Token> lineaAux = new List<Token>();
                 List<Token> lineaDerivada = new List<Token>();
+                
+                //Añado la linea a la lista de procesos
+                Tokens.LstProcesoDeDerivacion.Add(linea);
 
                 //Imprime la linea sin derivar
                 foreach (Token token in linea)
@@ -279,6 +282,8 @@ namespace Analizador_Lexico
                     {
                         lineaDerivada = Derivar(lineaAux, true);
 
+                        ListaTokens.ReducirLinea(ListaTokens.ObtenerPosiciones(lineaAux, linea), linea, lineaDerivada.ElementAt(0));
+
                         lineaAux = BPStack.Pop();
 
 
@@ -303,10 +308,13 @@ namespace Analizador_Lexico
                     aux.ForEach((item) => lineaAux.Add(item));
 
                     lineaDerivada = Derivar(lineaAux, false);
+
+                    ListaTokens.ReducirLinea(ListaTokens.ObtenerPosiciones(lineaAux, linea), linea, lineaDerivada.ElementAt(0));
                 }
                 else
                 {
                     lineaDerivada = Derivar(lineaAux, false);
+                    ListaTokens.ReducirLinea(ListaTokens.ObtenerPosiciones(lineaAux, linea), linea, lineaDerivada.ElementAt(0));
                 }
 
                 Tokens.LineasDerivadas.Add(lineaDerivada);

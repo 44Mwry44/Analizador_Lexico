@@ -13,6 +13,8 @@ namespace Analizador_Lexico
         List<List<Token>> _lstTokens = new List<List<Token>>();
         List<List<Token>> _lstLineasDerivadas = new List<List<Token>>();
 
+        List<List<Token>> _lstProcesoDeDerivacion = new List<List<Token>>();
+
         public List<Token> LstLineaTokens
         {
             get { return _lstLineaTokens; }
@@ -29,6 +31,12 @@ namespace Analizador_Lexico
         {
             get { return _lstLineasDerivadas; }
             set { _lstLineasDerivadas = value; }
+        }
+
+        public List<List<Token>> LstProcesoDeDerivacion
+        {
+            get { return _lstProcesoDeDerivacion; }
+            set { _lstProcesoDeDerivacion = value; }
         }
 
         public void AddLineaDeTokens(List<Token> miLstTokens)
@@ -67,6 +75,86 @@ namespace Analizador_Lexico
             //    });
             //    Console.Write('\n');
             //});
+        }
+
+        public static List<int> ObtenerPosiciones(List<Token> seccionDerivada, List<Token> linea)
+        {
+            List<int> posiciones = new List<int>();
+            int indexSeccion = 0;
+
+            for(int indexLinea = 0; indexLinea < linea.Count; indexLinea++)
+            {
+                while (linea.ElementAt(indexLinea).equals(seccionDerivada.ElementAt(indexSeccion)))
+                {
+                    posiciones.Add(indexLinea);
+                    indexLinea++;
+
+                    if(indexSeccion == seccionDerivada.Count - 1)
+                    {
+                        break;
+                    }
+
+                    indexSeccion++;
+                }
+
+                if (indexSeccion == seccionDerivada.Count - 1)
+                {
+                    break;
+                }
+
+                if (indexSeccion != 0)
+                {
+                    posiciones = new List<int>();
+                }
+                indexSeccion = 0;
+                //indexLinea++;
+            }
+
+            return posiciones;
+        }
+
+        public static List<Token> ReducirLinea(List<int> posiciones, List<Token> linea, Token tokenObtenido)
+        {
+            List<Token> aux = new List<Token>();
+            bool saltarToken = false, tokenDerivadoAgregado = false;
+            int posicion = 0;
+
+            foreach(Token token in linea)
+            {
+                saltarToken = false;
+                while(posicion < posiciones.Count - 1)
+                {
+                    if (linea.FindIndex(item => item.equals(token)) == posicion)
+                    {
+                        saltarToken = true;
+                        posicion++;
+                        break;
+                    }
+                }
+
+                if(posicion == posiciones.Count - 1 && !tokenDerivadoAgregado)
+                {
+                    aux.Add(tokenObtenido);
+                    tokenDerivadoAgregado = true;
+                }
+
+                if(saltarToken)
+                {
+                    continue;
+                }
+
+                aux.Add(token);
+            }
+
+            //foreach(Token miToken in aux)
+            //{
+            //    Console.WriteLine("Reduccion: \n");
+            //    Console.Write(miToken.StrToken + ' ');
+            //}
+
+            //Console.Write('\n');
+
+            return aux;
         }
     }
 }
